@@ -1,0 +1,2145 @@
+hi everyone welcome back to another
+video in the web security academy series
+in today's video we'll be discussing the
+theory behind sql injection
+vulnerabilities
+this video is pretty much a brain dump
+of everything that i consider to be
+fundamental knowledge when it comes to
+sequel injection attacks and so it's
+going to be a long one
+so if you're only interested in a
+specific topic related to sql injection
+then i would recommend
+going to the description and checking
+out the timestamps that i have mapped
+out to the different topics that i cover
+in this video
+okay let's get started we'll start off
+with describing what a sequel injection
+vulnerability is
+and the technical details behind this
+category of vulnerabilities
+so in this section we'll discuss topics
+like
+what are sql injection vulnerabilities
+what are the different types of sql
+injection vulnerabilities
+how common are sql injection
+vulnerabilities and so on
+next we'll cover how to find sql
+injection vulnerabilities from both the
+black box
+and the white box perspective so if
+you're given
+an application and possibly even the
+source code of the application
+how would you approach testing the
+application in order to determine if
+it's vulnerable to sql injection
+in the third section we'll cover how to
+exploit sql injection vulnerabilities
+so imagine you're testing an application
+and you discover
+that one of the input vectors or one of
+the
+parameters is potentially vulnerable to
+sql injection
+in that case how do you go about
+exploiting that vulnerability
+in order to gain access to sensitive
+information or even potentially gain
+remote code execution
+on that server
+last but not least now that you have
+successfully found and exploited a sql
+injection vulnerability
+what recommendations can you give to the
+client in order to remediate the
+vulnerabilities that you found
+so in this section we'll cover the
+different techniques that you can use to
+prevent sql injection vulnerabilities
+okay let's start off with the first
+section what is sql injection
+sql injection is a vulnerability that
+consists of an
+attacker interfering with the sql
+queries that an application makes to the
+backend database
+so if you as an attacker can manage to
+interact and change the sql query
+by adding sql characters or sql code
+in an input vector of an application
+then the application is definitely
+vulnerable to sql injection
+now to better understand this let's take
+an example
+imagine you have an attacker a web
+server
+and a database the application that the
+web server hosts has an authentication
+functionality where the user has to put
+in their
+username and password and once the
+username and password
+are put in equity is made to the
+database to see if this username and
+password
+are in the database and if they are then
+the user is presented with
+uh his or her profile page if the user
+enters an incorrect username or password
+then the user is presented with an error
+message that says
+you have entered an incorrect username
+or password
+so in this case we clearly have two
+input vectors the username field and the
+password field a talk to the backend
+database so they get included in a query
+in the backend database
+and so we definitely need to test these
+input vectors
+for a sql injection vulnerability to see
+if that input
+is validated in any way
+so let's see what an attacker can do in
+this case
+what an attacker is doing is in the
+username field instead of just adding a
+username
+the attacker adds the username admin the
+account that the attacker wants to
+compromise but then the attacker also
+adds some sql characters
+after the username so add single quote
+and then add double dash which stands
+for a comment
+so what happens is that
+this username gets included in a query
+so what the query does
+at the back end is it says select star
+from users so select all the entries
+from the users table
+where username is equal to whatever
+username is put in here
+and password is equal to whatever
+password is put in here
+now if this input is properly validated
+and we'll talk about that
+in the next couple of sections if this
+input is properly validated then the
+database will literally look for a
+username
+that is equal to admin dash admin code
+dash dash in the database
+and it won't find one because no one has
+that username and so the attacker would
+be presented with
+an incorrect username or password
+um however if this application is
+vulnerable to sql injection so it
+doesn't use parameterized queries it
+doesn't validate
+user input then what will happen is that
+any sql characters or sql code that the
+attacker adds as part of the payload
+will become part of the query and so in
+this case what's happening
+is select star from users so select the
+entries from the users table
+where username is equal to admin the
+single quote over here that the
+attacker included closes the string or
+the username
+and then the double dash stands for a
+comment and so it says comment out the
+rest of the query
+and so what happens is the query becomes
+this so select
+all the entries from the users table
+where username is equal to
+admin now admin is an existing username
+in the database
+and so what happens is that the database
+will return the admin user profile
+and the attacker gets logged in as the
+admin user
+so essentially what happened over here
+is that the attacker
+exploited a sql injection vulnerability
+in the login functionality of the
+application
+in order to bypass authentication so in
+this case the attacker no longer needed
+to know the admins password
+because the attacker was able to change
+the query to no longer
+ask for the admins password so that's
+one
+example of how you could use uh sql
+injection vulnerabilities
+in order to um in order to bypass
+authentication
+on login functionality now let's talk
+about
+what are other impacts of sql injection
+attacks
+and the real answer to this is that it
+really depends on the context
+of the sql injection that you're
+exploiting so some sql injection
+vulnerabilities will only allow you to
+view data
+whereas others will allow you to
+actually modify data
+so when i was coming up with this slide
+instead of listing the infinite
+number of things that you could do to
+applications with sql injection
+vulnerabilities
+i instead decided to just compare it to
+the asea triad
+so how it affects confidentiality
+integrity
+and availability so in terms of
+confidentiality
+some sql injection vulnerabilities will
+allow you to view sensitive information
+such as usernames
+and passwords so the application's
+username and password
+and that's an example of how you impact
+the confidentiality
+of an application by accessing
+information that you shouldn't
+have access to in terms of integrity
+some sql injection vulnerabilities will
+allow you to alter
+data in a database and an example of
+that
+that i exploited not too long ago is an
+application that allows you to
+update an email address and so because
+this was vulnerable to sql injection
+i was able to update another user's
+email address
+to one that i control and so uh what i
+did
+is because i control this email address
+i reset the password
+of the user and the reset token was sent
+to the email address that
+i own and so i hijacked the user's
+account and that's an example of how to
+effect the integrity of the application
+because you were able to alter data that
+you shouldn't
+have otherwise been able to alter it
+also affected the availability
+of the application because i denied when
+i reset the user's password i denied
+access to the user's account
+and so i affected the availability of
+the application
+and of course in certain scenarios sql
+injections could actually lead to remote
+code execution
+on the operating system and that affects
+confidentiality integrity
+and availability all at once and you
+would gain
+access to the operating system with the
+same privilege that the database is
+running with
+and so you got to be very careful in
+terms of
+making sure that the database runs with
+the least privilege
+possible and we'll discuss that in the
+last section
+when we're talking about things like
+defense in depth
+and how to prevent sql injection
+vulnerabilities
+okay so um we talked about the impact
+of sql injection vulnerabilities now the
+question
+is how common and how critical are sigma
+injection vulnerabilities
+and one way to measure that and it's not
+bulletproof is the
+awasp top 10 list so for those of you
+that have never heard of the oas top 10
+project
+it's essentially the list of top 10 most
+critical
+security risks to web applications it's
+updated every couple of years so you
+could see over here i've got the 2010
+list
+the 2013 list and then the 2017 uh
+list i believe 2020 is in the works so i
+think it was submitted but has not been
+approved yet but i could be wrong so i
+think
+2017 is the latest one that we have
+right now and you'll notice over here it
+does change across the years so you've
+got cross-site scripturing
+was the second most critical risk to web
+applications in 2010
+and then it it became the third most
+critical risk in 2013
+and then it dropped all the way to uh
+the seventh most critical risk
+in 2017 and you'll see some of them
+completely disappear
+so insufficient transport layer
+protection was number nine
+of most critical risks in 2010 but that
+but it completely disappeared in 2013
+and 2017
+um and that's probably because it's so
+easy to now get certificates
+and use https on your side even
+malicious sites use https right now so
+it's definitely
+um not a risk anymore but then you see
+also new ones get added so
+for example insecurity serialization
+over here
+was never a risk in 2010 or 2013 was not
+part of the list
+and in 2017 it became part of the list
+now for sql injection vulnerabilities
+they fall
+under the first most critical risk
+to web applications so they fall under
+the injection category however it's
+worth
+mentioning that this covers all of
+injection vulnerabilities not just sql
+injection vulnerabilities
+in fact uh the likelihood of sql
+injection vulnerabilities
+existing in applications has decreased
+across the years for many reasons and
+we'll discuss that in the last section
+when we discuss how to prevent sql
+injection vulnerabilities
+nevertheless um it is still a critical
+risk
+because as we saw in the
+past couple of slides if you do have
+even just one parameter that is
+vulnerable to sql injection it could
+potentially lead to
+remote code execution on the server so a
+full compromise of the underlying server
+all right so in the past couple of
+slides we got a high level overview of
+what sql injection vulnerabilities are
+now we're going to go at a more granular
+level and talk about the different types
+of sql injection
+sql injection vulnerabilities can be
+classified into three
+major categories the first is in bend
+or classic sql injection the second
+is inferential or blind sql injection
+and the third is out-of-band sql
+injection
+now in-band or also known as classic
+sql injection vulnerabilities are ones
+where the attacker
+uses the same communication channel to
+both launch
+the attack and gather the results of the
+attack if that doesn't make much sense
+to you that's okay
+don't worry i actually have a couple of
+slides explaining each type in detail
+right now i'm simply giving you a high
+level overview of what each type is
+now inbend or classic sql injection is
+divided into two types
+error-based sql injection and
+union-based sql injection
+error-based sql injection is a technique
+where you force the database
+to generate an error giving you more
+information about how things
+operate at the back end so an example
+would be if you have a parameter that is
+vulnerable to sql injection
+and then you put into that parameter a
+single quote and that breaks the backend
+query which generates
+um an error at the application level and
+so
+what happens is that the error tells you
+things like
+uh the version of the database so the
+type of database that they're using at
+the backend
+the version of the database and
+sometimes the
+error will also tell you the exact sql
+query that is being used at the backend
+and this would make your life so much
+easier because if you know the exact
+query you don't have to guess it using
+trial and error
+and this way you could just build your
+sql payload so that's an example of
+error-based sql injection for union
+based sql injection it's a technique
+that leverages the union operator to
+combine the results of two queries into
+a single result set
+so in this technique you don't just
+output the result of the original query
+that the application
+makes but you also output the result of
+a query of your choosing
+and of course something that you would
+be interested in is
+uh for example the usernames and
+passwords of the users of the
+application
+so you would use the union operator to
+output
+the credentials of the users of the
+application and again we'll see examples
+of that in the next coming
+slides the next category which is
+inferential
+or also known as blind sql injection in
+this type of vulnerability there's no
+actual transfer of data
+via the web application so you don't see
+the results
+in the application itself instead you're
+stuck asking the application true or
+false questions
+which is what boolean base sql injection
+is
+or causing the database uh to pause for
+a specified period of time
+which is time-based sql injection in
+order to determine if what you're asking
+the application is correct or not
+obviously the way you exploit to blind
+sql injections is more difficult
+than classic sql injections however uh
+the
+impact even if you're not seeing the
+results right away in your application
+the impact of exploiting the
+vulnerability is still as bad as
+in bend or classic sql injection and
+we'll see examples of that in a bit
+okay the third and last category
+is out-of-band sql injection this occurs
+when the attacker is unable to use the
+same channel to launch the attack and
+gather the results of the attack
+it usually relies on the ability of an
+application
+to make a network connection so for
+example a dns
+or http request to deliver data to an
+attacker
+i've seen people loop this type of sql
+injection
+under inferential or blind sql injection
+which is a fair thing to do however
+if you look at resources online most of
+the resources out there will separate
+them into uh three different categories
+and that's why i decided to also
+separate them into
+three different categories in my video
+okay let's go more in depth about each
+type starting with
+in-band or classic sql injection
+we talked about in-band sql injection
+vulnerabilities
+occurring when the attacker is able to
+use the same communication channel
+to both launch an attack and gather the
+results of an attack
+so to put this in plain simple english
+if you exploit a sql injection
+vulnerability by sending a sql payload
+in one of the fields of an application
+and then you see the result
+of your sql payload presented directly
+to you
+in the application then this falls under
+the
+category of in-band sql injection now
+uh just by the nature of how this
+specific type of vulnerability works
+it's much easier to exploit than other
+categories of vulnerabilities
+and the reason behind that is because
+you actually see the result of your
+attack in the response of the
+application versus having to infer the
+result like you would have to
+in a blind sql injection again we said
+that there's two types of
+in-band sql injection error-based sql
+injection
+and union-based sql injection and we'll
+start off with error-based sql injection
+error-based sql injection is an in-band
+sql
+injection technique that forces the
+database to generate an
+error giving the attacker information
+that could potentially
+aid in developing the injection payload
+so
+let's take an example imagine you have
+an
+application www.random.com that has an
+id parameter that is vulnerable
+to sql injection in this case we're
+putting a single quote in the id field
+and because that is a sequel character
+and this is vulnerable to sql injection
+that single quote will become a part of
+the query and so
+it'll break the backend query and it'll
+output an error and an example error
+is you have an error in your sql syntax
+check the manual that corresponds to
+your mysql server version
+blah blah blah so in this case it tells
+you that you're using mysql
+that's good information to know it might
+also tell you the version
+and again in certain scenarios the error
+might also give you the query that
+happens when you
+put an id parameter so what's happening
+when um
+you put for example an integer in the id
+parameter
+uh the exact query that happens uh at
+the back end and this way if you have
+the exact query it's so much easier for
+you to develop your payload versus
+sending a bunch of requests to the
+um the application in order to determine
+what the payload is
+and so this is in-band sql injection or
+classic sql injection because you see
+the output of your sql injection right
+there in the application
+and it's error-based because the idea is
+that you
+put an error in the application
+next we have union based sql injection
+union based sql injection is a type of
+in-band sql injection technique
+that uses the union sql operator to
+combine the results of two queries into
+a single result
+set again i mentioned in the previous
+couple of slides
+that i don't want to output just the
+result of the original query
+i want to output a query of my choosing
+and if an application is vulnerable to
+union based sql injection then i get the
+ability to
+output the result of a query of my
+choosing and combine it with the
+original
+query that the application is with the
+result of the original query that the
+application is making
+let's take an example you have your
+application www.random.com it has an id
+field that is vulnerable to a union
+based sql injection
+and if you put in a valid id then the
+page will display all the products that
+are associated to that id
+now instead of just displaying the
+products associated to a specific id
+i want to output the results of another
+query and in this case the query is
+select the username
+and the password from the users table so
+output all the usernames and passwords
+from the users table and then comment
+out the rest of the query
+so in this case it will
+output the results of this query over
+here we didn't put an id
+and so that would be empty and then
+it'll combine it with the results of
+this query over here which is the
+username
+so carlos an administrator and the
+passwords of the
+users in the users table now
+of course the union operator has certain
+conditions for it to work and so it's
+not as simple as hey i'm going to output
+whatever i want
+in as many fields as i want um it's
+it's not the case instead there are
+certain conditions that you have to
+follow and we'll discuss that in
+the exploitation section of this video
+okay so that covers in-bend or classic
+sql injection
+next let's talk about inferential or
+blind sql injection
+inferential or blind sql injection is
+a sql injection vulnerability where
+there's no actual transfer of data via
+the web application
+so unlike in-band sql injection where we
+directly saw the output of the sql
+injection displayed for us in the
+application
+in the case of blind sql injection the
+database does not
+output data to the web page and so this
+forces the attacker to steal
+data by asking the database a series of
+true and false questions
+and then determining based on how the
+application responds
+whether uh whether the application
+responded with yes this is a true
+statement versus no this is not a true
+statement
+um and again uh this will become more
+clear once we discuss the different
+types of
+blind sql injection and we take uh
+examples
+uh now just because an attacker can't
+directly display data from the database
+that doesn't mean that this is a
+harmless vulnerability
+like i said in the previous slides in
+fact it's just as dangerous as embedded
+sql injection
+because you can extract information from
+the database by ex
+by asking true and false questions it's
+just that this type of vulnerability
+takes a little bit longer and a little
+bit more skill set
+in order to exploit
+okay and we said there are two types of
+blind sql injection boolean based sql
+injection
+and time based sql injection let's talk
+about
+boolean based sql injection
+boolean based sql injection is a blind
+sql injection technique that uses
+boolean conditions to return a different
+result set
+depending on whether the query returns
+true or
+a false result so in simple english
+again the attacker sends different sql
+payloads that ask the database
+true and false questions and depending
+on the how the database responds then
+you could infer whether the data
+responded
+the application responded with true or
+false
+this is sometimes referred to as content
+based blind sql
+injection so you'll see those two terms
+used uh
+interchangeably now let's take an
+example so that this becomes
+a little bit more clearer imagine again
+you have an application www.random.com
+and it has an id parameter that is
+vulnerable to a blind sql injection
+and imagine in this case you can't
+simply use the union operator to output
+data in the database like we did
+with union union-based sql injection so
+in this case what you can try
+uh to test if the field is vulnerable to
+sql injection
+is first inject it with a false payload
+so force a payload that you know is
+false
+and then see how the application
+responds and then force a payload that
+you know is true
+and see how the application responds and
+if the application responds
+differently in the false payload versus
+the true payload then this is
+uh vulnerable to boolean based blind sql
+injection
+so let's take the backend query so
+imagine over here
+when you enter an id number
+the query this is the query that happens
+at the backend so select the title
+from the product table where id is equal
+to one and because id is equal to one is
+a valid id in the table
+the application will display the title
+of the products that are associated to
+id1
+now if we want to force a false
+payload what we can do is we could use a
+conditional statement
+and one is equal to two so the back end
+query would be select the title
+from the product table where id is equal
+to one and one is equal to
+two now we said id is equal to one well
+is a valid id
+and so this will evaluate to true and
+one is equal to two
+um we'll evaluate to false because one
+will never be equal to two and so
+because this is an
+and statement over here you're using the
+and operator
+they both have to be true in order for
+the entire where clause to evaluate to
+true so this evaluates to true this
+evaluates to false
+true and false is equal to false
+and so the entire where condition
+evaluates to false
+and so it won't display a title uh from
+the product table
+so in this case if you force the false
+statement you won't get the title of the
+products that are associated to id is
+equal to 1.
+now let's see what happens when you
+force a true statement
+so we'll use conditional statements and
+we'll say id is equal to 1
+and 1 is equal to 1. now we said id is
+equal to 1 evaluates to true because
+this is a valid id in the table
+and one is equal to one one will always
+be equal to one
+and so this will always evaluate to true
+true and true
+evaluates to true and so the where
+clause evaluates to true and so the
+title
+of the products that are associated to
+id one
+will be outputted on the page and so
+right now
+i have two different responses depending
+on whether i force a false statement
+versus a true statement and so i'm able
+to tell when the application is telling
+me yes this is a true statement versus
+no this is not a true statement
+and so now you might be wondering well
+it's nice that i can play around with
+the application and get it to output
+true or false but how does that
+actually matter and how does that help
+me in
+exploiting a sql injection vulnerability
+to get
+sensitive information from the database
+to answer that let's take another use
+case so imagine the same application
+the application has a login
+functionality and so it has a users
+table in the database
+and the users table has the usernames
+of the users of the application so in
+this case administrator
+and the hashed passwords of the users in
+the application
+and so i want to extract this hash
+password for the administrator
+but i can't simply output it on the page
+like i would for union-based sql
+injection
+and so i have to use my boolean based
+sql injection um
+in order to output it and that's only
+done using by
+asking the application true and false
+questions and so
+the way i'm going to do that is by using
+this payload over here which generates
+this query over here
+so you've got i'll use the substring
+function and what that function does it
+extracts
+some characters from a string so the
+first method the first parameter
+that it takes is the string that you
+want to extract from
+the second parameter that it takes is
+the start position
+or the extraction and the third
+parameter that it takes
+is the number of characters to extract
+so in this case
+i'm saying that string to extract from
+is the output of this query so select
+the password from the users table where
+username is equal to
+administrator this query will output
+this hashed
+string over here and then i'm asking it
+extract the first character in the
+string and
+only one character and so it will um
+extract the first character over here of
+the hashed password and then i'm asking
+it is this first character
+equal to s in this case the first
+character is not equal to
+s because the first character is e and
+so
+this this statement over here evaluates
+to false
+true and false evaluates to false and so
+the where clause evaluates to false and
+you shouldn't see a title
+from the products page and so nothing is
+returned on the page
+that means it returned false that means
+i know that s
+is not a first character in the hashed
+password
+now imagine i keep looping through the
+characters and i get to e
+and i ask it again is the first
+character of the hashed password equal
+to e
+that evaluates to true right so the
+backend query would be
+true and true so the entire where clause
+evaluates to true and so the title
+of the products that are associated to
+id1 are returned on the page
+and this gives me an indication that it
+returned true
+which again tells me that e is the first
+character of the hashed password
+and so right now you should get an
+indication of how you're going to
+extract information from the database
+and why i said it takes more skill set
+and more time than
+union-based injection and that's because
+you're
+asking the application true and false
+questions and you're going to have to do
+that for each
+character so you start off with the
+first character you loop through
+all the alphanumeric characters until
+you get a true result once you get a
+true result that means you know you
+discovered what the character is
+which is e over here and then you move
+on to the next one
+and then you loop through the
+alphanumeric characters until you get
+another true statement and then that
+means you discovered what this character
+is
+and then again you loop through all the
+alphanumeric characters
+until you discover what this character
+is and so on until
+you output the entire uh string of the
+hashed password and this could take
+thousands of requests
+obviously you can do it manually and so
+you have to automate
+the tasks and we'll do that in one of
+the videos where we
+use burp intruder to automate it we'll
+also write a python script
+that does it for you and it might seem
+like it's something that is very
+difficult but it's not
+um writing the script in python takes
+about five minutes five to ten minutes
+max
+and then outputting the um the string is
+going to take less than one minute
+putting the entire hashed uh password so
+that's boolean based
+uh blind sql injection next
+let's talk about time-based blind sql
+injection
+time-based sql injection is a
+blind-based sql injection technique
+that relies on the database pausing for
+a specified amount of time
+then returning the results indicating a
+successful sql
+query execution so just like
+uh just like we did for boolean based
+sql injection what we do for time-based
+sql injection
+is we inject a payload in the parameter
+that is vulnerable and what that payload
+does
+it pauses the application the response
+of the application for a certain period
+of time so in postgres sql you would use
+the pg
+sleep command and and put a certain
+number of seconds so if i use pg sleep
+10 that means
+i ask the application to sleep for 10
+seconds
+and so if the response time takes 10
+seconds to get back to me then i know
+it's vulnerable to
+time based sequel injection if it
+doesn't take 10 seconds
+so it takes the general one second to
+get back to me then it's not vulnerable
+to
+time-based sql injection and
+the example is the same for
+boolean-based sql injection the way you
+would extract
+information from the database is
+by asking the application true and false
+questions except the condition over here
+is not a response in the application
+the indication of whether it's true or
+false is going to be based on
+the response time of the application and
+so i'm going to say if the first
+character of the administrators hashed
+password is an a then wait for 10
+seconds
+and if the response time takes 10
+seconds to respond to me
+then the first letter is a if it doesn't
+take 10 seconds then the first letter
+is not a and again this can't be done
+manually
+you're going to have to script it and
+you can do that in python where you
+measure the response time
+and then depending on what the response
+time is you determine whether it's true
+or false okay
+last but not least uh let's talk about
+out-of-band
+sql injection out-of-band sql injection
+is a vulnerability that consists of
+triggering an
+out-of-band network connection to a
+system that you control
+so this technique is usually used when
+you can't apply any of the other
+techniques that we learned about so far
+and it's not a common technique because
+it does rely
+on certain features being enabled in the
+database for it to actually make that
+network connection now to exploit this
+vulnerability you could use a variety of
+protocols
+but you'll see that the most commonly
+used ones are dns
+and http and one that we will look at in
+the videos it's in the web security
+academy so in the upcoming videos we
+where we gain hands-on experience doing
+this is this example over here
+where you exploit the vulnerability by
+using the
+xp dir-3 stored procedure in ms
+sql to perform a lookup of
+this domain over here so this domain was
+generated using burp collaborator
+and so you own it um since this is the
+domain that you control
+you can confirm if there were any dns
+lookups
+if there was then this is vulnerable to
+add a banned sql injection
+if it's not vulnerable then you won't
+see the dns lookup we'll see how to do
+this
+in the lab videos now once you've
+confirmed that you have an out-of-band
+sql injection
+in some cases you might be able to
+directly exfiltrate data
+whereas in other cases you might have to
+use conditional statements like we did
+with
+boolean and time-based sql injection
+where if you do get a dns lookup then
+yes
+this is a true scenario if you don't get
+a dns lookup then no it's not a true
+scenario
+all right in the past couple of slides
+we discussed the different types of sql
+injection vulnerabilities
+now in this section we'll discuss how to
+find sql injection vulnerabilities
+so imagine you've been given an
+application and asked to test it how
+would you go about testing the
+application
+to see if it's vulnerable to any sql
+injection vulnerabilities
+before we cover that it's worth
+mentioning that the methodology used for
+finding sql injection vulnerabilities
+differs from one person to another
+person
+and it's usually developed by experience
+so just because i give you my
+methodology doesn't mean that you have
+to follow it to the letter
+instead i would recommend that you take
+what is useful for you from it
+and then build and add on to your own
+methodology as you gain more and more
+experience
+in pen testing web applications and
+that statement applies for finding all
+the vulnerabilities not just
+sql injection vulnerabilities okay
+so finding sql injection vulnerabilities
+i've decided to split
+uh this into two categories depending on
+the perspective
+of uh testing and the two categories
+are black box testing and white box
+testing for those of you that have
+never heard of these terms before
+blackbox web application patent testing
+is when the tester is given little to no
+information about the system
+usually the only information that the
+tester has access to
+is the url of the application and the
+scope of the engagement so this is
+uh similar to mimicking an external
+attacker that
+is trying to attack your system the
+attacker usually doesn't know anything
+about the application
+other than the main url of the
+application
+now for whitebox web application pen
+testing it's the complete opposite the
+tester would be given complete access to
+the system including access to the
+source code
+of the application now there's a third
+category that i haven't
+included on the slide and it's called
+grey box
+web application pen testing this is a
+combination of white box and black box
+pen testing where the tester is given
+limited information
+and access to the system for example
+instead
+of just giving the tester a url of the
+application like you would with blackbox
+pen testing the tester is also given
+accounts to the application
+so when it comes to my methodology of
+finding sql injection vulnerabilities i
+loop both grey box and black box pen
+testing into one category and that's
+because my methodology is the same
+regardless of the category the way i see
+it
+is if i'm approaching it from a black
+box perspective
+my scope will be much more limited than
+the gray box perspective unless i find
+authentication bypass vulnerability
+nevertheless the methodology is still
+the same for
+finding sql injection vulnerabilities
+whether i'm doing it
+in a public or an authenticated page
+and that's why they're looped in
+together now when it comes to white box
+pen testing that's a whole different
+methodology because you actually gain
+access to the source code of the
+application and reviewing source code is
+a whole different realm
+than approaching an application from the
+outside
+all right let's start off by talking
+about how to test applications from a
+black box perspective the first thing
+that i do when testing an application
+is map the application and what that
+means is i literally visit the url of
+the application
+i walk through all the pages that are
+accessible to me within the user context
+that i'm running as
+i make note of all the input vectors
+that potentially talk to the back end
+i understand how the application
+functions i try to figure out
+the logic of the application i try to
+find subdomains in the application
+i enumerate directories and
+pages that might not be directly visible
+to me through the application
+and so on and while i do all of that i
+have my
+proxy listening silently and
+intercepting all the requests that i'm
+making to the application
+so mapping the application is such an
+underrated step when it comes to pen
+testing applications
+although i would argue it's probably the
+most important
+step and the reason i say that is
+because i usually see beginners in this
+field
+get way too excited about the fact that
+they're testing an
+application and then the first thing
+that they do is start throwing
+potentially malicious input vectors
+into the application to see if the
+application responds in an unusual way
+and although this is a valid way of
+testing an application
+it doesn't make you any different from
+an automated tool
+so this is exactly what web application
+vulnerability scanners do they crawl the
+application
+they locate all the input vectors and
+then they throw a ton of malicious
+payloads at these input vectors
+and depending on how the application
+responds the scanner logs the behavior
+as a potential vulnerability
+and this way of testing usually only uh
+discovers the
+low hanging vulnerabilities so if you're
+doing exactly what a scanner can already
+do then your testing is really not
+adding any value
+instead of doing that what i would
+recommend is you leave that up to the
+scanners
+and instead spend quite a bit of time
+understanding how the application works
+because most of the critical
+vulnerabilities found in applications
+are logic flaws that a scanner is not
+capable of finding on its own
+or um the vulnerabilities are embedded
+in pages that the scanner can't crawl so
+technologies that the scanner can crawl
+okay so once you've mapped the
+application
+and you've listed all the input vectors
+that are potentially included in queries
+that are interacting with the sql
+database then it's a matter of fuzzing
+the application
+and that's because we're looking for sql
+injection vulnerabilities you'd be
+fuzzing the application with sql
+specific characters so what that means
+is you add special characters in the
+input vectors
+and see if the application responds in
+an unusual way
+now depending on how the application
+responds you start refining your query
+until you achieve your end goal and
+that's what makes you different from a
+scanner
+because a scanner just simply throws a
+bunch of input
+at the application you as a human being
+is capable you're capable of
+understanding the output
+of the sql injection and so you're able
+to refine your sql injection using
+multiple requests
+until you actually achieve your goal and
+we'll see how to do that in the
+exploitation section
+of this video okay again fuzzing the
+application means
+adding special characters and input
+vectors and seeing if the application
+responds
+in an unusual way now that can be done
+in many ways
+the first thing that i try to do is
+submit sql specific characters such as
+the quote or the double quote or the
+hash or the
+dashes that represent comments and see
+if the application outputs an
+error now errors are really important
+and really useful because they give you
+information about how the backend
+operates so sometimes they give you the
+database that you're using they give you
+the version of the database we discussed
+that sometimes they actually give you
+the exact query
+if they gave you the query then you hit
+gold because this way you don't have to
+develop your payload across multiple
+requests instead you already know what
+the backend query is and so you just
+develop your payload based on that query
+and so the first thing that i do is try
+to output an error once i have an
+error i try to build my query um
+using multiple requests so i refine my
+query based on the errors that i get and
+i build my query now in certain
+scenarios you don't actually get an
+error like for a blind sql injection and
+so you also have to submit boolean
+conditions such as
+you know and or one equal to one
+and one is equal to two and look for
+differences in the applications
+responses
+so if you can get the application to
+respond differently when you force a
+true use case versus when you force
+a false use case that means it's
+vulnerable to boolean
+injection uh next i
+i do the same thing as boolean injection
+instead it would be
+to trigger time delays in the
+application and then see
+if there's a difference in the time it
+takes to respond
+so if you input a function that causes a
+time delay and you
+actually observe that time delay that
+means that the application is vulnerable
+to
+time-based sql injection last but not
+least
+i also submit out-of-band payloads
+that are designed to trigger a network
+interaction with a server that i control
+and if i get that network interaction
+whether it's a dns lookup or it's done
+through http
+that means that the application is
+vulnerable to out a band sql injection
+and if i don't get them that means it's
+not vulnerable to add a band sql
+injection
+so that's a high level overview of my
+methodology when it comes to
+testing from a black box perspective
+there's really
+two steps first mapping the application
+so
+listing all the input vectors in the
+application
+and then fuzzing the input vectors to
+see
+if i can if i can find a sql injection
+and again when it comes to fuzzing the
+input vectors
+you can refine your requests based on
+the responses that the application
+gives you okay next is
+whitebox testing perspective so where
+you're given the source code of the
+application
+in this case the first thing that i do
+is i enable
+web server logging and i enable database
+logging enabling
+logging at the web server level will
+help because
+when you're fuzzing the application like
+we did with blackbox perspective
+it will generate errors on all the
+different
+um invalid characters that you input
+into the application and then that helps
+you
+to detect that a sql injection uh
+exists and then also to refine your
+payload
+later on similarly for database logging
+i enable that because when i
+think that there's a sql injection
+vulnerability and i enter a sql
+injection payload in the parameter i'd
+like to see how it was logged at the
+back end
+and then depending on how it was logged
+at the backend i can see what characters
+made it through and in what format they
+made it through and then i could say
+um with maybe a 90 accuracy that yes
+this is vulnerable to sql injection
+before
+i even look at the source code of the
+application
+so once i have my logging enabled the
+next thing that i do is map the
+application just like i would with
+a black box perspective so i'll start
+with the applications
+graphical user interface i'll map all
+the visible functionality in the
+application all the input vectors that
+potentially talk to the backend
+and i'll make a list on them next
+because i do have access to the source
+code i'll also do a resurrect search
+on all instances in the code that talk
+to the database and that really
+that really depends on how the
+application is programmed and then
+which database it uses and so on
+but i would have regex strings
+that i look for in the code to see
+if i've missed anything that i haven't
+mapped from a black box perspective and
+you'll see that there are certain pages
+that
+might not have been directly accessible
+through the main page of the application
+and you didn't discover them through
+directory brute forcing and so it's
+useful to actually look at the code and
+see if there's anything that you missed
+once i have a list of everything what i
+would do
+is i would literally fuzz the
+application so
+i would submit sql characters
+that could potentially break the query i
+will look at how
+they were logged using database logging
+that i enabled in the first step
+and then uh based on that i can usually
+tell if it's vulnerable to
+do sql code injection and if i feel like
+it's vulnerable to sql code injection
+then i actually do a code review
+of that functionality so for example if
+i think the login page is vulnerable to
+sql injection what i would do
+is i will look for the login
+functionality so the function that
+implements that in the code and then i
+would do a walkthrough of the entire
+functionality
+from beginning to end until until i have
+confirmed that it is
+vulnerable to sql injection in theory
+and then to confirm in practice that it
+is vulnerable to sql injection
+then i would test it out and depending
+on the response i get from the
+application that means
+it's vulnerable to sql injection
+so again that's my methodology doesn't
+mean that it's a methodology that you
+should follow
+i do know people that would
+automatically just go into the source
+code and then do a search for
+insecure functions when it comes to
+parameterized queries and so on and so
+if they find an insecure function
+they'll start with that instead of
+doing kind of a hybrid approach of
+both black box and white box which is
+the way that i the methodology that i
+described
+okay in the past two sections we talked
+about the different types of sql
+injection vulnerabilities
+and how to test an application to see if
+it's vulnerable to sql injection
+now in this section we'll talk about how
+to exploit sql injection vulnerabilities
+in order to achieve your end goal and uh
+that really depends on the sql injection
+vulnerability that you're trying to
+exploit
+uh we so far talked about four different
+uh sorry actually five different types
+error-based sql injection union-based
+sql injection
+boolean based blind sql injection based
+blind sql injection and out of band sql
+injection so in this section we'll talk
+about how to exploit
+each one of these vulnerabilities
+and we'll start off with error-based sql
+injection
+now as a reminder we said error-based
+sql injection is an
+in-band sql injection technique that
+forces the database to generate an error
+giving the attacker information upon
+which to refine
+a query so a successful exploitation of
+an error-based sql injection
+is the fact that you can get the
+application to output an error so
+there's really not much to explaining
+this vulnerability all you would do is
+submit sql specific characters
+again such as the single quote or the
+double quote and you
+look for errors in the application
+now different characters can give you
+different errors so it's good to fuzz
+the application with the commonly known
+characters
+to generate errors next
+is a union-based sql injection
+exploiting this vulnerability is a
+little bit more involved
+as a reminder we said union-based sql
+injection is an in-band sql injection
+technique
+that leverages the union sql operator
+to combine the results of two queries
+into a single result set
+now in order for you to use the union
+operator you have to follow
+the rules of the union operator and
+there's two basic rules the first one is
+that the number
+and the order of the columns must be the
+same in all queries
+and the second one is that the data
+types must be
+compatible so the query that the
+application is making
+and the query that you want to make have
+to satisfy these two rules
+and so when you're exploiting union
+based sql injection the first thing that
+you need to do is figure out the number
+of columns that the query is making
+we'll talk about that in a bit and we've
+got two ways of doing that
+next you figure out the data types of
+the columns
+we're mainly interested with string data
+because we want to extract things like
+usernames and passwords and so on and so
+that's usually saved in string format
+and so we need to find a data type that
+outputs
+uh string data and this way we could
+output the data that we want to extract
+and then once you've figured out the
+number of columns that the query is
+making and the data types of the columns
+then you could use the union operator to
+output information from the database
+sometimes
+you don't actually get the data type
+that you want and so it's a dead end
+you can only extract for example
+integers or so on so
+it depends on the sql injection and the
+context that you're running with on
+whether you could actually exploit it to
+extract information from the backend
+database
+okay so i said there's two different uh
+ways
+of determining the number of columns
+that that are required in a sql
+injection union attack and one of the
+ways is using the
+order by clause
+now this clause orders uh the result set
+of a query by a specified column list
+so let's take an example if you've got
+select the title
+and the cost from the product table
+where id is equal to one
+and then you say order by 1 what that
+means
+is that you're ordering by the first
+column which is by the title column over
+here
+now the way to figure out the number of
+columns
+is to incrementally inject a series of
+order by clauses
+until you get an error or observe a
+different behavior in the application
+so if i say order by one
+it'll order by the first column if i say
+order by two it'll order by the second
+column
+now if i say order by three that column
+doesn't exist
+and so i get an error saying the order
+by position number three
+is out of range of the number of items
+in the select list
+and so this way i know that 3 is not a
+column and since
+i incrementally increase the value of
+the order by
+integer over here i know then the number
+of columns is this value minus 1 so 3
+minus 1 which is
+2. so i know that number of columns that
+are being used in the sql query
+is 2. so that's the way to do it using
+the order by clause you could also
+figure out the number of columns
+required in a sql injection
+using null values
+so again let's take example of a query
+that does select the title
+and the cost from the product table
+where id is equal to one
+and then you say union select null
+and then dash dash for a comment
+character
+now because a union using the union
+operator requires that
+this query has the same number of
+columns as this query
+if you don't use the same number of
+columns you will get an error
+so if you incrementally inject a series
+of union select payloads specifying a
+different number of null values
+until you no longer get an error then
+you could figure out the number of
+columns that are required by a sql
+injection so
+for example this when i put this payload
+over here which is the one over here
+it'll give me an error saying something
+like all queries combined using a union
+intersect or except operator
+must have an equal number of expressions
+in their target list
+so it's telling me you're using the
+union operator but your two queries
+don't have the same number of columns
+and so i know that the query does not
+have
+only one column so i increase the number
+of null values again by one so now i
+have two null values
+and i try it out and i see if it gives
+me an error that means
+it has more than two columns and i try
+three and so on until i no longer get an
+error
+now in this case we only have two
+columns and so this will
+um this will output uh the results
+of this query over here and then the
+null values over here so this won't give
+me an error
+and that means that the number of
+columns that i have
+are is equal to the number of null
+values that i entered which is 2.
+so you could either do it by the order
+by clause or
+use by adding union select payloads
+specifying
+different numbers of null values
+okay so that's how to find out
+the number of columns that the query is
+using next we need to find a useful data
+type
+in these columns and so the way to do
+that
+is to probe each column to test whether
+it can hold string data
+by submitting a series of union select
+payloads that place a string value into
+each column in turn so
+over here what i would do now i know
+that it has two columns right
+from the previous exercise that we just
+did so what i would do
+is i would um add a string value
+so a in the first in the first column
+value and see if it outputs an
+error if it outputs an error saying that
+i don't know it's incompatible with a
+certain type so in this case we're
+saying that the first
+uh the first value is actually integer
+and so i get an error saying that it's
+incompatible which means that the first
+column does not allow you to
+is not a string data type so
+next i try the second column over here
+so i keep this as null and i try the
+second column and if i get an error that
+means this
+also is not does not accept string
+values and i keep doing that
+until i find a value that allows me to
+enter a string data and again in some
+cases you might not actually find a
+value and that's why some sql injections
+allow you to do things like extract data
+from a database whereas others you're
+very limited in what you're
+like the data type that you're allowed
+to extract
+okay and so going back to the slide um
+explaining union based sql injection we
+talked about how to figure out the
+number of columns
+that the query is making we also talked
+about how to figure out the data types
+of the columns
+if you have um columns that are being
+outputted on the page
+and they use string data then you could
+use
+the union operator to output information
+from the database
+and that's how you exploit union based
+sql injection
+next let's talk about exploiting boolean
+based blind sql injection
+so uh the first thing to do is submit a
+boolean condition that evaluates to
+false
+and note the response i've got an error
+here it should say
+note the next thing to do is submit a
+boolean condition that evaluates to true
+and again note the response if the
+response
+is different or when you force the false
+statement versus a true statement then
+you have a boolean baseline sql
+injection and the way to exploit that we
+already talked about that
+is to write a program that uses
+conditional statements to ask the
+database a series of true and false
+questions
+and then monitor the responses if the
+response
+is the same as the response you got when
+it evaluated to true that means
+uh the question that you're asking the
+application is true
+if the response is the same as the
+response that you got when you
+force the false statements that means
+the question that you're asking the
+application
+is false and that's how you extract data
+from the database when it comes to
+boolean-based
+blind sql injection next
+is time-based blind sql injection
+what you do is you submit a payload that
+pauses the application for a specified
+period of time
+if the application does actually pause
+for that specified period of time that
+means it's vulnerable to time-based sql
+injection
+and then it's a matter of doing the same
+thing that you did for boolean based sql
+injection you
+just write a program that uses
+conditional statements to ask the
+a series of true and false questions and
+you monitor the response time
+if there's a delay in the response time
+that means the question you're asking
+the application is true
+if there's no delay in the response time
+that means the question you're asking
+the application is false and then you
+send a bunch of those requests until you
+enumerate
+or you extract the thing that you want
+to extract from the database
+and we'll gain experience in all of
+these different types of
+sql injection vulnerabilities like
+hands-on experience in the next upcoming
+videos
+okay so explaining how to ban sql
+injection
+um again a reminder this is a
+vulnerability that consists of
+triggering
+an out-of-band network connection to a
+system that you control
+and the way to exploit it is to submit
+out-of-band payloads designed to trigger
+an out-of-band network interaction when
+executed within
+a sql query and monitor for any
+resulting
+uh interactions so this is a database
+specific
+obviously so knowing the type of
+database that you're using
+will be very useful in in this scenario
+and it depends on whether the database
+has these functions enabled
+and so if you do get that network
+connection if you receive that network
+connection
+again whether it's a dns lookup or
+something else that means that
+the application is vulnerable to add a
+band sql injection
+and in certain scenarios you might be
+able to immediately expel
+data from the application so directly
+excel data from the application whereas
+in other cases you're again stuck asking
+true and false questions just like you
+would for
+line based sql injection
+okay i didn't want to end this section
+without talking about
+automated exploitation tools so one of
+the famous ones and it's open source
+is a sql map it's a tool that is used to
+find sql injection vulnerabilities
+it's very very powerful and it's very
+customizable
+in the sense that you select what
+parameters you could
+inject you also select the figurosity of
+your testing you also select
+the angle of your testing so if it does
+find a sql injection vulnerability
+sometimes you have the ability to say
+try to
+get a shell on the system or try to dump
+the usernames and passwords of the
+applications on the system and so on and
+so this is a very important tool to look
+into when it comes to finding sql
+injection vulnerabilities
+other tools that you could use which are
+more for detection versus
+uh actually exploiting it to to
+achieve your end goal our web
+application vulnerability scanners
+we talked quite a bit about these in
+this video
+there are scanners that crawl the
+application and look for vulnerabilities
+so not just sql injection
+vulnerabilities they look for all types
+of vulnerabilities
+in an application um and they usually
+report it as a vulnerability they don't
+actually go
+all the way to explaining it to get a
+shell on the system or to dump
+usernames and passwords and some of
+these tools
+are open source whereas others are
+paid so something to look into of course
+these tools have limitations
+and uh maybe i'll do a video specific on
+that because that's what my research was
+on but these tools have
+limitations and they operate from a
+black box uh perspective so there are
+other tools that operate from a white
+box perspective
+they're called static analysis tools
+whereas these are called dynamic
+analysis tools so something to look into
+when you want to automate a portion of
+your
+web application testing
+all right now that you know what a sql
+injection vulnerability is
+how to find it and how to exploit it the
+next thing to learn is how to prevent
+sql injection vulnerabilities
+and that will come in really handy when
+you're writing pen testing reports and
+you need to provide recommendations to
+your client on how to remediate the
+vulnerabilities that you discovered
+so there are the primary defenses
+and the additional defenses which use
+the concept
+of defense in depth we'll talk about
+each defense in the next couple of
+slides
+and those are the ones that are
+mentioned in the web application hackers
+handbook
+but the idea is i have this highlighted
+over here because this is the correct
+way of preventing sql injection
+vulnerabilities and that is by using
+prepared statements
+or parameterized queries instead of
+string concatenation within a query all
+the other options are partial options
+and should be used only as a last resort
+with the knowledge
+that they might be bypassed or they
+might be implemented incorrectly and
+they might cause a sql injection in the
+in the future
+and so let's talk about each one in
+order starting with the correct
+way of defending against sql injection
+vulnerabilities and that's
+using prepared statements
+okay so let's take an example first so
+you've got
+a code block over here the first one
+which is query over here
+as a select the account balance from the
+user data table
+where username is equal to
+request.getparameter customername
+so what this does is it takes user input
+so user controlled input customer name
+and it
+adds it directly to the query and then
+it defines the structure so it's
+defining the structure of the query
+and then it executes the query do you
+spot the issue over here
+it's a bit obvious the user supplied
+input customer name over here is
+embedded directly into the sql
+statement and so anything that the user
+adds over here might actually be
+interpreted as
+a part of the query
+okay so using uh prepared statements can
+prevent
+can prevent sql injection attacks and
+that's because the construction
+of the sql statement is performed in two
+steps the first being the
+application specifies the query
+structure with placeholders for each
+user
+supplied input and then the application
+specifies the content of each
+placeholder this way there's no way that
+a user-supplied input that is specified
+in this step over here can ever
+interfere with the structure of the
+query
+in this first step and that's because
+the query structure had already been
+defined
+and now any placeholder data is
+interpreted in a safe way
+as literally data versus sql code
+and so let's take an example of code
+that is not vulnerable
+so in this code over here you could see
+there is uh
+the variable uh cust name it takes and
+user supplied input customer name
+you've got the query over here being
+defined
+and then over here it prepares the
+statement through a database connection
+so the prepare statement method is
+invoked
+to interpret this query and fix the
+structure of the query and then
+the set string method is used to specify
+the parameters actual value
+now uh because the query structure is
+already has already been fixed
+in the prepared statement this value can
+contain
+any data without affecting the structure
+of the query because it will literally
+be interpreted as data versus as part of
+the query so if the user over here had
+put in sql characters like a quote or a
+double quote or so on
+that won't be interpreted as data and it
+can't ever change the structure of the
+query because the structure has already
+been
+determined and fixed and that's how you
+prevent
+sql injection vulnerabilities that's the
+correct way of preventing sql injection
+vulnerabilities
+now there are partial options that the
+book talks about
+one is the use of stored procedures
+so start procedures are batches of
+statements
+grouped as a logical unit and stored in
+a database um
+this is not a not always a safe way of
+preventing sequel injection
+uh vulnerabilities because if it's
+implemented incorrectly it could still
+be vulnerable to sql injections so it
+still needs to be called in a
+parameterized way
+in order for it to be safe against sql
+injection vulnerabilities
+um and uh the reason that some people
+would use
+uh stored procedures or any of the
+partial options is because
+uh there are certain parameters that you
+can't specify as
+placeholders in parameterized queries
+and for example the table name or the
+column name
+and so if that's user controllable you
+have to use one of the partial options
+in order to prevent sql injection
+attacks now
+the correct way of doing it is that this
+should never be user controllable but if
+it has to be user controllable then you
+use one of the partial options
+that's option two option number three is
+whitelist input validation so define
+which values are authorized
+everything else is considered to be
+unauthorized and we talked about
+parameters that can be placeholders like
+the table name and the column name
+in this case a whitelist input
+validation would be you know
+exactly the column name should be or the
+table name should be users and so you
+only accept the value users and nothing
+else
+and this way you prevent the attacker
+from injecting
+other characters or other strings that
+could potentially
+interfere with your query option number
+four
+is escape all user input the validate
+user input
+and um that should only be used as a
+last resort again it's a partial option
+versus
+something that for sure prevents sql
+injection vulnerabilities
+okay additional defenses uh before we
+talk about that let's talk about
+the concept of defense in depth
+so the idea is to make it as difficult
+as possible for the attacker to
+compromise your organization
+and that's done by providing additional
+protection in the event
+at the frontline defenses bill so
+if me as an attacker i want to gain
+access to your organization
+and i managed to get past the first
+block that you had put in my way
+then i would have two other obstacles
+that i need to get through before i get
+to your organization
+and so in the same sense although you
+use parameterized queries
+just in case you by chance forgot to
+include it on one parameter um in one
+page
+you want to have defenses in place that
+if a sql injection vulnerability was
+exploited the attacker gets
+gets another obstacle in their way
+before they could achieve their goal and
+so
+one is least privilege so the
+application should use the lowest
+possible of privileges when accessing
+the database
+and the reason behind that is if a sql
+injection exists in your application
+and an attacker exploits it to gain
+remote code execution
+on the server that the database is
+installed on
+then the attacker will gain the same
+level of privilege that the database is
+running with and so
+if the database is running a system or
+route then the attacker already has
+all the privileges that the attacker
+needs on that server however if it was
+running with a service account
+that has all the privileges stripped
+then the attacker has to find ways to
+escalate privileges on the server before
+they can for example move laterally
+within the organization
+and so the application should always use
+the lowest possible
+level of privilege when accessing the
+database
+any unnecessary default functionality in
+the database should be removed or
+disabled that includes things like
+functions that allow you to execute
+system commands from the database
+also functions that allow you to make a
+network connection that we talked about
+out of band sql injection right
+so functions that allowed that allow you
+to do that
+so any unnecessary default functionality
+that you don't need
+for the application to function that
+should be removed because
+it decreases the
+amount of things that an attacker can
+use in order to penetrate your
+organization
+ensure cis benchmarks for the database
+in use is applied
+so there are benchmarks for most of uh
+the databases out there
+and these are rules uh on the way to
+configure
+your database in order to ensure that
+it's secure
+and it includes things like the
+application should use the lowest
+possible level of privilege
+and removing any default functionality
+and so on
+so look up your database version and you
+should be able to find a cs benchmark
+for it
+and last but not least this one's
+obvious all vendor issued security
+patches should be applied in a timely
+fashion
+so if you get notified uh that the
+database version that you're using
+is vulnerable to some kind of
+vulnerability then you should
+patch your database as soon as possible
+decrease the window of time that the
+attacker has
+to attack your database and to exploit
+the vulnerability
+and then this one we already discussed
+it so whitelist
+input validation so although you have
+parameterized queries another
+an additional defense so a defense and
+depth is to still whitelist
+um all the input values that come from
+come from the user so come from the
+client side
+okay and that wraps up the last section
+before i close this video let's talk
+about the resources that were used to
+create this video one is the web
+security academy so the sql injection
+module and that's the module that we'll
+be following for the next couple of
+videos
+next is the web application hackers
+handbook so chapter 9
+attacking data stores if you want to
+learn more about this topic you should
+go and read this
+chapter and then we've got the oasp
+guide for sql injection
+and sql injection prevention cheat sheet
+i also included the pen test monkey
+url and the reason behind that is
+because
+it lists all the different sql injection
+payloads
+that you could use depending on the
+database that you're using and then
+there's other ones like payload all the
+things and so on we'll see a lot of this
+when it comes to
+the videos to wrap up in this video we
+learned about sql injection
+vulnerabilities how to find them
+how to exploit them and how to prevent
+them you can find a link to the slides
+in the description
+in the next couple of videos we will
+gain hands-on experience
+exploiting all the different types of
+sql injection vulnerabilities that we
+learned about
+in this video
+if you made it this far thank you for
+watching make sure to hit the subscribe
+button and share the video so that it
+reaches a wider audience
+also comment below what you liked about
+the video and the type of videos you
+would like to see in the future
+thank you and see you in the next video

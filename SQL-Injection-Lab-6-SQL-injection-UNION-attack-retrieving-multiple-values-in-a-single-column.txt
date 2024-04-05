@@ -1,0 +1,575 @@
+hi everyone welcome back to another
+video in the web security academy series
+in the previous video we covered lab
+number five
+in the sql injection module so we got
+some hands-on experience by exploiting a
+union-based sql
+injection in order to extract the
+usernames and passwords
+of the users of the application in
+today's video we'll be using a
+union-based sql injection attack in
+order to retrieve multiple values in a
+single column
+if you do not have an account on the web
+security academy
+you can get one by visiting the url
+portswigger.net
+web security and clicking on the sign up
+button
+i already have an account and i am
+logged in so to access the lab i'm going
+to click
+on academy
+go down select the learning path
+select sql injection
+select union attacks
+and today we'll be covering the last lab
+which is this one over here so sql
+injection union attack retrieving
+multiple values
+in a single column
+all right let's get started this slab
+contains a sql injection vulnerability
+in the product category filter
+so we've got sql injection
+and it's in the product category filter
+the results from the query are returned
+in the applications response so
+you can use a union attack to retrieve
+data from other tables we already
+learned how to exploit union based sql
+injection in previous labs
+the database contains a different table
+called users with columns called
+username and password to solve the lab
+perform a sql injection union attack
+that retrieves
+all the usernames and passwords and use
+the information to log in as the
+administrator
+user so the end goal over here
+is to retrieve
+all usernames and passwords
+and log in as the administrator
+user this slot provides us with a hint
+over here we're not going to look at it
+just yet
+we'll revisit this section over here
+when we're working with the lab
+okay let's access the lab
+okay let's create an analysis section
+all right so it looks like the same
+shopping application that we've been
+dealing with in the past couple of
+exercises
+if we click on for example lifestyle
+it'll filter based on the products that
+are related to lifestyle
+and we'll see over here that it filters
+based on a category parameter that
+is in the url so that's the parameter
+that
+is vulnerable to a sql injection
+vulnerability
+okay so the first thing to do to confirm
+that it is vulnerable to a sql injection
+vulnerability is to inject it with
+a sql character that could potentially
+result in a syntax error which could
+result in an internal server error at
+the application level
+okay so now i'm convinced that this is
+vulnerable to sql injection now since
+the results are displayed on the page in
+at least one column we could use union
+based sql injection in order to output
+content from other databases
+and to do that we said the first step
+would be to find the
+number of columns
+that the vulnerable query is using
+and to do that we'll use the order by
+clause
+and we'll iteratively order by each
+column
+until we get an internal server error if
+we get an internal server error that
+means we're ordering by a column that
+does not exist
+and so it gives us an indication on the
+number of columns that are being used by
+the vulnerable query
+so we'll start off with one
+and we don't get an internal server
+error which means
+that this column exists and notice over
+here that
+it didn't actually order this column and
+so this is not column one
+column one is a column that is not
+displayed on the page
+and so since it's not displayed on the
+page it won't help us
+in terms of displaying usernames or
+passwords
+so let's make a note saying not
+displayed
+on the page
+next let's try with column number two
+okay so column number two definitely
+exists and
+it's this one over here because you'll
+see it order the alphabets
+so we'll make a note over here displayed
+on the page because that's a column that
+we can use in order to output data from
+other tables in the database
+okay let's try with three
+and we get an internal server error
+so what that means is we're trying to
+order by a column
+that does not exist and that's why the
+application through an
+error which means that the number of
+columns is three
+minus one which is equal to two
+and we know that the column that is
+displayed on the page is
+two and so that's the one that we'll be
+using in order to
+output data on the page so the second
+thing that we said
+we have to do in a union based sql
+injection attack
+is to find which columns
+contain the data type text and the
+reason behind that is because when we're
+outputting user names
+and passwords we're outputting content
+that is of type text or of type string
+and so we need to output them in columns
+that accept
+types text or string so to do that
+we said we use the union
+operator and the select
+statement we know that we've got
+two columns based on this and so
+instead of having null null in both
+columns we
+start testing each column out to see if
+it accepts the type string
+so in this case a now testing the first
+column is not really useful because it's
+not outputted on the page and so we
+can't actually use it
+but let's try it out either way
+so we get an internal server error which
+means that the column does not accept
+data type
+text let's try with the second one
+okay and we could see a over here which
+means that the second column
+accepts data type text which should have
+been obvious from the beginning because
+you could see over here that it has
+alphabets
+in the column all right so
+this is our column over here i'm gonna
+put two stars
+so the third step is to output data
+from other tables
+and in this exercise we're interested in
+a user's table
+and we want to retrieve the usernames
+and passwords
+of the users of the application now
+we run into an issue over here and the
+issue
+is the fact that we only have one column
+in order to output data
+in but we want to output data from two
+columns
+both the usernames and the passwords
+column so
+what we could do is output each column
+at once so
+union select null for the first column
+and then username
+from users table and what that will do
+is it will output the
+username entries from the user table
+in column number two
+there we go we could see administrator
+and carlos and another user right over
+here
+and then in order to output the password
+we run the query again except we output
+the password over here
+and you could see over here it's
+outputting the passwords of the users
+of the application now i don't want to
+do this in two separate queries
+i want to be able to output both the
+username and the password in the page
+all at once in one query and the way to
+do that
+is by using certain payloads
+and we'll look at the hint section over
+here that was provided in the
+exercise so you've got over here
+string concatenation depending on the
+database that you're working with
+and what that is is being able to
+concatenate several strings
+into a single string so in oracle that's
+the way you do it
+and microsoft that's the way you do it
+in mysql that's the way you do it and so
+on so we'll use that in our exercise
+however we don't know the database that
+we're working with so we first have to
+figure out the database before we know
+how to concatenate strings together
+and to do that if you go down you could
+use the
+database version command and then based
+on that you can tell what database
+you're working with so
+let's start off with microsoft
+so it would be over here
+and it's no longer from the users table
+okay and we get an internal server error
+that means we're probably not using the
+correct syntax which means that we're
+probably not dealing with a microsoft
+database so
+let's try with postgresql
+so the syntax for that is version
+here we go okay so it outputs the
+version of the database and
+just because the payload or the command
+that is used in order to display the
+version of postgresql databases
+now i know that i'm dealing with
+a postgresql database and i know the
+exact version as well which is good
+information to know so i'm going to copy
+that
+and put it over here now the reason we
+wanted to know the exact database is to
+figure out how to concatenate strings so
+if we go
+up that's how you do string
+concatenation in postgres sql so
+our new command would be
+select null and then
+username
+and then what is the two bars or the or
+operator
+password from the users table and this
+should output
+both the username and password into a
+single column
+so let's try that out
+and here we go so it shows that it's
+outputting the username and password but
+i don't know where the username
+ends and where the password begins and
+so
+what i'm gonna do is add one more string
+so a character that i know is an
+added character so let's say a star
+and this way it will place a star
+between the username and the password
+and let's try that
+and here we go so you've got all the
+users of the application
+and now you can tell which is the
+username and which is the password so
+let's save that over here
+okay so the end goal was not just to
+display all the usernames and passwords
+but to actually log in as the
+administrator user so let's do that
+so username is administrator and the
+password is the one that we just found
+over here
+so everything after the star character
+click on log in
+and it says congratulations you solved
+the lab
+so we successfully completed the
+exercise
+alright the next step is to script it
+and to do that
+we always start by importing the request
+library
+this is a library that will allow you to
+perform
+get and post requests
+next we'll import sys
+and url lib3
+and then i'm going to add this line over
+here
+to disable any insecure warnings
+okay let's click on view toggle word
+wrap
+all right next we set our proxy setting
+and that comes in really handy when
+you're debugging your script if it
+doesn't work
+and then https
+127.0.0.1
+8080. so what this is going to do it's
+going to send all the requests that the
+script is making through burp first
+before it sends it to the application
+and then any responses from the
+application get sent through burp first
+before it gets sent back to my script
+and we'll see how this comes in handy in
+a bit
+next we'll create our main method so
+if name
+is equal to main
+then we've got a try and accept clause
+so the way i want my script to run is
+i've got script dot py
+and then it takes in the url so i'm not
+going to perform step number one
+and step number two in this script
+because that's going to take me about 30
+minutes to do and we've already done it
+in previous labs so instead i'm gonna
+assume we already know step number one
+and step number two so
+the number of columns in the column that
+accepts
+text and i'm just gonna perform step
+number three in this script
+i'll leave it up to you as an exercise
+in order to be able to integrate all
+three steps in one script
+okay so it takes an only one command
+line argument and that's the url
+so we'll save that in a parameter called
+url
+and we'll take that from the command
+line
+if you give it the incorrect number of
+command line arguments so it doesn't
+find the url
+i don't want it to print the exception
+instead i want it to print
+the usage and example instructions
+so let's say usage name of the program
+the url
+mark v 0
+and then the example instructions
+so let's say www.example.com
+and again name of the program
+okay and since i ran it incorrectly i
+want to exit it
+all right so that's what happens if you
+run into an exception
+now assuming that you ran it correctly
+and it saves the url in the url
+parameter over here
+i want it to print
+dumping the list of usernames
+and passwords
+and then we're going to create a
+function called
+exploit sqli
+users table
+and it takes in the url parameter over
+here
+and then if this function outputs false
+so returns false
+[Music]
+print
+did not find an administrator password
+okay so we're going to implement this
+function right now
+and again takes in the url
+so we said we're making a few
+assumptions that we know the username
+that we want to
+output is the administrator username
+next we need the path to
+the vulnerable parameter and to do that
+we can get it from the url
+but we're gonna need burp anyway so
+let's open it up right now
+click ok
+close next star burp
+okay notice over here my proxy settings
+is the same as the one that i set in my
+script and this is why the script is
+able
+to send the request to burp i also need
+to configure my browser
+to send the request to burp and i do
+that using an extension called foxy
+proxy
+so i'm going to click on intercept over
+here
+click log out and notice over here it
+intercepted my request so i'm going to
+set intercept off and work from the
+history tab
+and this turned off so sorry this timed
+out
+so let's open a new one
+and we no longer need this one over here
+okay let's click on paths
+and here we go that's a path to our
+vulnerable
+parameter so let's copy that
+put it over here
+next we want our sql payload
+and we'll get that from our notes
+document
+so it was this one over here
+and then i'm going to make the request
+so we're using gap because it's making a
+get request
+over here
+and the url is going to be url plus
+sorry the uri is going to be the url
+plus the path
+plus sql payload
+i'm going to set verify to be equal to
+false because i don't want to
+verify tls certificates and then proxies
+to be equal to proxies because i wanted
+to send the requests through burp
+next i'm going to save the response in a
+variable called res
+and then i'm going to say if you found
+the text
+administrator so the string
+administrator and the response
+then i want you to print
+found the administrator password
+and then i want a way to extract the
+administrator password from
+the response code and so to do that i'm
+going to import two more libraries
+so from bs4
+import beautiful soup
+and we'll use that in order to parse the
+response
+i'm also going to import re which allows
+me to use regular expressions
+so let's see how the username and
+password are displayed in the response
+so to do that let's
+take this again copy it
+and run our attack one more time
+okay looking at burp
+let me see here we go all right
+so you've got administrator star and
+then
+the password of the administrator user
+so to extract that
+i'm going to parse the response using
+the beautiful soup library
+so r dot text and use
+html parser
+and then i'm going to say the admin
+password
+is equal to soup.fine so my variable
+over here
+and i'm asking it to find the text
+that is equal to
+this regular expression over here
+so dot star
+administrator
+and again dot star so a string that
+contains
+the string administrator in it and then
+i'm going to split that string
+on the character star
+and extract it
+okay so what this does is it finds this
+string over here
+and then it extracts the second argument
+based on the star so you've got the star
+over here
+this is argument number one which is in
+an array considered as
+index zero and then what i'm interested
+in is not the administrator username but
+the password and so
+i want to extract the second argument
+and in an array that would be
+index 1. okay
+once i've extracted it i want to print
+it
+so print
+the administrator password
+is
+and we'll add it over here so admin
+password
+so the variable over here
+and then i'm going to return true
+otherwise i'm going to return
+false okay let's save that
+okay so what this does oh we've got a
+mistake over here
+here we go so what this does is it's
+going to print dumping the list of
+usernames and passwords
+then it'll run the function exploit sqli
+users table
+if it finds the administrator string in
+the response of
+the sql injection attack then it'll
+print found the administrator password
+and then
+it'll print the administrator password
+is so and so
+otherwise it returns false which ends up
+printing did not find an
+administrator password okay hopefully
+this does not have any mistakes in it
+let's save it and run it so python3
+sqli lab06
+dot and let's grab the url
+and run it here we go
+it ran in the first try which is great
+that means i didn't make any errors all
+right so it says dumping the list of
+usernames and passwords let's look at
+burp
+and then it makes this uh get request
+over here
+it looks for administrator
+it finds the administrator password and
+then it extracts it and it outputs it
+over here so this one over here all
+right so we've successfully completed
+the exercise to recap
+in this video we first manually ran a
+sql injection attack in order to
+retrieve multiple values so the
+usernames and passwords of the users of
+the application and output them
+in a single column we then scripted that
+exploit so that it automatically does
+that for us
+in the next lab we'll learn how to
+exploit a union-based sql injection
+vulnerability in order to query the
+database type
+and version on oracle
+if you like the video hit the subscribe
+and share button so that it reaches a
+wider audience
+also comment below what you learn and
+what you would like to see more of in
+the future
+thank you and see you in the next video
